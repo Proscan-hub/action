@@ -1,0 +1,66 @@
+name: 'Proscan Security Scan'
+description: 'Run Proscan security scans in your GitHub Actions workflow'
+author: 'Proscan'
+
+branding:
+  icon: 'shield'
+  color: 'green'
+
+inputs:
+  server-url:
+    description: 'URL of your Proscan instance'
+    required: true
+  api-token:
+    description: 'Proscan API token'
+    required: true
+  scan-type:
+    description: 'Scanner type: sast, sca, secrets, iac, container, api, dast'
+    required: true
+  target:
+    description: 'Path or URL to scan'
+    required: false
+    default: '.'
+  quality-gate:
+    description: 'Fail the workflow if the quality gate is not met'
+    required: false
+    default: 'true'
+  sarif-upload:
+    description: 'Generate SARIF output for GitHub Code Scanning'
+    required: false
+    default: 'false'
+  severity-threshold:
+    description: 'Minimum severity to trigger failure: critical, high, medium, low'
+    required: false
+    default: 'high'
+  timeout:
+    description: 'Scan timeout in minutes'
+    required: false
+    default: '30'
+
+outputs:
+  findings-count:
+    description: 'Total number of findings'
+  critical-count:
+    description: 'Number of critical findings'
+  high-count:
+    description: 'Number of high severity findings'
+  scan-url:
+    description: 'URL to view full results in Proscan'
+  status:
+    description: 'Scan result: passed or failed'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Proscan Scan
+      shell: bash
+      env:
+        PROSCAN_URL: ${{ inputs.server-url }}
+        PROSCAN_TOKEN: ${{ inputs.api-token }}
+        SCAN_TYPE: ${{ inputs.scan-type }}
+        TARGET: ${{ inputs.target }}
+        QUALITY_GATE: ${{ inputs.quality-gate }}
+        SARIF_UPLOAD: ${{ inputs.sarif-upload }}
+        SEVERITY_THRESHOLD: ${{ inputs.severity-threshold }}
+        SCAN_TIMEOUT: ${{ inputs.timeout }}
+      run: ${{ github.action_path }}/scan.sh
